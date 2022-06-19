@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'images_processing.apps.jobs.apps.JobsConfig',
     'images_processing.apps.logs.apps.LogsConfig',
+    'images_processing.apps.images.apps.ImagesConfig',
 ]
 
 MIDDLEWARE = [

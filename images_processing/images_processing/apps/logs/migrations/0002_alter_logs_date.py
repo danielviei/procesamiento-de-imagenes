@@ -7,18 +7,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('jobs', '0001_initial'),
+        ('logs', '0001_initial'),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='steps',
-            name='end_time',
-            field=models.DateTimeField(default=datetime.datetime.now),
-        ),
-        migrations.AlterField(
-            model_name='steps',
-            name='start_time',
+            model_name='logs',
+            name='date',
             field=models.DateTimeField(default=datetime.datetime.now),
         ),
     ]
