@@ -1,31 +1,30 @@
 import os
 
+from django import forms
 from django.shortcuts import render
 from PIL import Image
-from rest_framework import viewsets, status
+from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from images_processing.apps.jobs.tasks import start_fsm
-from .models import Jobs, Steps, ImageTransformationFSM
-from .serializers import JobSerializer, StepSerializer
+from .models import Jobs, ImageTransformationFSM
+from .serializers import JobSerializer
 
-class JobViewSet(viewsets.ModelViewSet):
+class JobsListAPIView(generics.ListAPIView):
     """
-    API endpoint that allows Jobs to be viewed or edited.
+    API endpoint that returns a list of jobs paginated.
     """
     queryset = Jobs.objects.all()
     serializer_class = JobSerializer
 
-class StepViewSet(viewsets.ModelViewSet):
+class JobsRetrieveAPIView(generics.RetrieveAPIView):
     """
-    API endpoint that allows Steps to be viewed or edited.
+    API endpoint that returns a job object.
     """
-    queryset = Steps.objects.all()
-    serializer_class = StepSerializer
-
-
-from django import forms
+    queryset = Jobs.objects.all()
+    serializer_class = JobSerializer
+    lookup_field = 'id'
 
 class UploadFileForm(forms.Form):
     title = forms.CharField(max_length=50)
