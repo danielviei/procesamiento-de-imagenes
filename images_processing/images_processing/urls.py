@@ -17,17 +17,17 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
 
-from .apps.jobs.views import JobViewSet, StepViewSet, job_start
-from .apps.logs.views import LogsViewSet
+from .apps.jobs.views import JobsListAPIView, job_start
+from .apps.logs.views import LogsListAPIView, LogsRetrieveAPIView
 
 router = routers.DefaultRouter()
-router.register(r'jobs', JobViewSet)
-router.register(r'steps', StepViewSet)
-router.register(r'logs', LogsViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),
     path('job/', job_start, name='job'),
+    path('jobs/', JobsListAPIView.as_view(), name='jobs'),
+    path('logs/', LogsListAPIView.as_view(), name='logs'),
+    path('logs/<int:id>/', LogsRetrieveAPIView.as_view(), name='log'),
 ]
