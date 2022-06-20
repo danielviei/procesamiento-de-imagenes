@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_fsm',
     'images_processing.apps.jobs.apps.JobsConfig',
     'images_processing.apps.logs.apps.LogsConfig',
     'images_processing.apps.images.apps.ImagesConfig',
@@ -58,7 +59,7 @@ ROOT_URLCONF = 'images_processing.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['images_processing/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -73,6 +74,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'images_processing.wsgi.application'
 
+BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -86,6 +88,12 @@ DATABASES = {
        'HOST': 'localhost',
        'PORT': '5432',
    }
+}
+
+# REST_FRAMEWORK
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
 }
 
 
