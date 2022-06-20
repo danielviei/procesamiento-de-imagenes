@@ -16,4 +16,9 @@ class JobSerializer(serializers.ModelSerializer):
     steps = StepsSerializer(many=True, read_only=True)
     class Meta:
         model = Jobs
-        fields = "__all__"
+        fields = [
+            'id',
+            'step',
+            'steps',
+            'status',
+        ]

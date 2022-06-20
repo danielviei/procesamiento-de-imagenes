@@ -9,9 +9,13 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
+import os
+from dotenv import load_dotenv
 
 from logging.handlers import SysLogHandler
 from pathlib import Path
+
+load_dotenv(dotenv_path="./django.env")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-u!^-$lq2+0=&l25h#(d22hmb9v0ud#5g1_-ao640yz#b7lqm0w'
+SECRET_KEY = os.environ.get("SECRET_KEY", 'django-insecure-u!^-$lq2+0=&l25h#(d22hmb9v0ud#5g1_-ao640yz#b7lqm0w')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -44,7 +48,6 @@ INSTALLED_APPS = [
     'django_fsm',
     'images_processing.apps.jobs.apps.JobsConfig',
     'images_processing.apps.logs.apps.LogsConfig',
-    'images_processing.apps.images.apps.ImagesConfig',
 ]
 
 MIDDLEWARE = [
@@ -78,7 +81,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'images_processing.wsgi.application'
 
-BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+BROKER_URL = os.environ.get('BROKER_URL' ,'amqp://guest:guest@localhost:5672//')
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -86,11 +89,11 @@ BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 DATABASES = {
    'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'image-processing',
-        'USER': 'daniel',
-        'PASSWORD': 'admin1234$',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.environ.get('DATABASE_NAME', 'image-processing'),
+        'USER': os.environ.get('DATABASE_USER', 'daniel'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD','admin1234$'),
+        'HOST': os.environ.get('DATABASE_HOST','localhost'),
+        'PORT': os.environ.get('DATABASE_PORT','5432'),
    },
    'logger': {
         'ENGINE': 'django.db.backends.postgresql',
