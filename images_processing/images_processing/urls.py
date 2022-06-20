@@ -18,10 +18,12 @@ from django.urls import include, path
 from rest_framework import routers
 
 from .apps.jobs.views import JobViewSet, StepViewSet, job_start
+from .apps.logs.views import LogsViewSet
 
 router = routers.DefaultRouter()
 router.register(r'jobs', JobViewSet)
 router.register(r'steps', StepViewSet)
+router.register(r'logs', LogsViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

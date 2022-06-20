@@ -19,7 +19,7 @@ class JobViewSet(viewsets.ModelViewSet):
 
 class StepViewSet(viewsets.ModelViewSet):
     """
-    API endpoint that allows Jobs to be viewed or edited.
+    API endpoint that allows Steps to be viewed or edited.
     """
     queryset = Steps.objects.all()
     serializer_class = StepSerializer
@@ -65,9 +65,7 @@ def job_start(request):
             )
 
             fsm.save()
-            state = start_fsm.delay(fsm.id)
-
-            # print(state.get(timeout=5))
+            start_fsm.delay(fsm.id)
 
             return Response(serializer.data["id"], status=status.HTTP_201_CREATED)
         else:

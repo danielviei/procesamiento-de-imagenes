@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+from logging.handlers import SysLogHandler
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_db_logger',
     'django_fsm',
     'images_processing.apps.jobs.apps.JobsConfig',
     'images_processing.apps.logs.apps.LogsConfig',
@@ -45,6 +47,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'images_processing.middleware.ExceptionMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -81,15 +84,63 @@ BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 
 DATABASES = {
    'default': {
-       'ENGINE': 'django.db.backends.postgresql',
-       'NAME': 'image-processing',
-       'USER': 'daniel',
-       'PASSWORD': 'admin1234$',
-       'HOST': 'localhost',
-       'PORT': '5432',
-   }
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'image-processing',
+        'USER': 'daniel',
+        'PASSWORD': 'admin1234$',
+        'HOST': 'localhost',
+        'PORT': '5432',
+   },
+   'logger': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'logger',
+        'USER': 'daniel',
+        'PASSWORD': 'admin1234$',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
 }
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(asctime)s %(message)s'
+        },
+    },
+    'handlers': {
+        'db_log': {
+            'level': 'DEBUG',
+            'class': 'django_db_logger.db_log_handler.DatabaseLogHandler',
+            'filters': [], 
+        },
+    },
+    'loggers': {
+        'db': {
+            'handlers': ['db_log'],
+            'level': 'DEBUG'
+        },
+        'django.request': { # logging 500 errors to database
+            'handlers': ['db_log'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'warning': {
+            'handlers': ['db_log'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'fatal': {
+            'handlers': ['db_log'],
+            'level': 'FATAL',
+            'propagate': False,
+        }
+    }
+}
 # REST_FRAMEWORK
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
