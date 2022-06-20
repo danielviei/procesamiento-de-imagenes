@@ -2,12 +2,7 @@ from rest_framework import serializers
 
 from .models import Jobs, Steps
 
-class JobSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Jobs
-        fields = "__all__"
-
-class StepSerializer(serializers.ModelSerializer):
+class StepsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Steps
         fields = [
@@ -16,3 +11,9 @@ class StepSerializer(serializers.ModelSerializer):
             'start_time', 
             'end_time',
         ]
+
+class JobSerializer(serializers.ModelSerializer):
+    steps = StepsSerializer(many=True, read_only=True)
+    class Meta:
+        model = Jobs
+        fields = "__all__"
