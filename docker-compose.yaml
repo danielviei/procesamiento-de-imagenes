@@ -5,17 +5,54 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - images_processing_network
     ports:
       - "5672:5672"
-
-  redis:
-    image: redis:latest
-    ports:
-      - "6379:6379"
+    profiles:
+      - all
+      - db
     
   postgres:
     image: postgres:latest
     env_file:
       - .postgres.env
+    networks:
+      - images_processing_network
     ports:
       - "5432:5432"
+    profiles:
+      - all
+      - db
+
+  celery_worker:
+    build: .
+    image: images_processing_celery_worker
+    env_file:
+      - ./django.env
+    networks:
+      - images_processing_network
+    command: celery -A images_processing worker -P gevent -l error
+    depends_on:
+      - postgres
+      - rabbitmq
+    profiles:
+      - all
+
+  django:
+    build: .
+    image: images_processing_django
+    env_file:
+      - ./django.env
+    networks:
+      - images_processing_network
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - 8000:8000
+    depends_on:
+      - rabbitmq
+      - postgres
+    profiles:
+      - all
+networks:
+  images_processing_network:
