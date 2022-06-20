@@ -55,12 +55,14 @@ Luego podemos iniciar el server
 En Linux:
 ```shell
 cd ./images_processing/
+python manage.py migrate
 python manage.py runserver
 ```
 
 En Windows:
 ```shell
 cd .\images_processing\
+python manage.py migrate
 python manage.py runserver
 ```
 
