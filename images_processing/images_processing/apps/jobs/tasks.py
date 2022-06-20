@@ -6,15 +6,15 @@ def start_fsm(fsm_id):
     fsm = ImageTransformationFSM.objects.get(id=fsm_id)
 
     while int(fsm.state):
-        if fsm.state == '1':
+        if fsm.state == 1:
             fsm.invert_colors()
-        elif fsm.state == '2':
+        elif fsm.state == 2:
             fsm.to_black_and_white()
-        elif fsm.state == '3':
+        elif fsm.state == 3:
             fsm.rotate()
-        elif fsm.state == '4':
+        elif fsm.state == 4:
             fsm.invert_vertically()
-        elif fsm.state == '5':
+        elif fsm.state == 5:
             fsm.save_final_image()
 
     return "SUCCESS"

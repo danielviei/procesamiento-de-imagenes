@@ -11,6 +11,8 @@ db_logger = logging.getLogger('db')
 class Jobs(models.Model):
     id = models.AutoField(primary_key=True)
     status = models.CharField(max_length=20, null=True, default='PROCESS')
+    step = models.IntegerField(null=True)
+    path_image = models.CharField(max_length=200, default='./static/', null=True)
 
     class Meta:
         ordering = ['id']
@@ -26,7 +28,11 @@ class ImageTransformationFSM(models.Model):
     state = FSMField(default=1)
     image_path = models.FilePathField()
     job_id = models.ForeignKey(Jobs, on_delete=models.CASCADE)
-    extension = models.CharField(max_length=5)
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.state = self.job_id.step
+        self.image_path = self.job_id.path_image
 
     def open_image(self):
         try:
@@ -38,7 +44,7 @@ class ImageTransformationFSM(models.Model):
 
         return image
 
-    @transition(field=state, source='1', target='2')
+    @transition(field=state, source=1, target=2)
     def invert_colors(self):
         try:
             image = self.open_image()
@@ -53,7 +59,7 @@ class ImageTransformationFSM(models.Model):
             else:
                 inverted_image = ImageOps.invert(image)
 
-            inverted_image.save(f'./static/{self.job_id.id}/current{self.extension}')
+            inverted_image.save(self.image_path)
         except Exception as e:
             db_logger.exception(e)
             self.state = 0
@@ -64,12 +70,14 @@ class ImageTransformationFSM(models.Model):
             step="Invertir Colores",
             status="SUCCESS",
         ).save()
+        self.job_id.step = 2
+        self.job_id.save()
             
-        db_logger.info(f'Image {self.job_id} had colors inverted')
+        db_logger.info(f'Image {self.job_id.id} had colors inverted')
 
         return "inverted"
 
-    @transition(field=state, source='2', target='3')
+    @transition(field=state, source=2, target=3)
     def to_black_and_white(self):
         try:
             image = self.open_image()
@@ -80,22 +88,24 @@ class ImageTransformationFSM(models.Model):
             ).save()
 
             b_and_w_image = image.convert("L")
-            b_and_w_image.save(f'./static/{self.job_id.id}/current{self.extension}')
+            b_and_w_image.save(self.image_path)
         except Exception as e:
             db_logger.exception(e)
             self.state = 0
             return None
 
-        db_logger.info(f'Image {self.job_id} is converted to black and white')
+        db_logger.info(f'Image {self.job_id.id} is converted to black and white')
         Steps(
             job_id=self.job_id,
             step="Pasar a Blanco y Negro",
             status="SUCCESS",
         ).save()
+        self.job_id.step = 3
+        self.job_id.save()
 
         return "black and white"
     
-    @transition(field=state, source='3', target='4')
+    @transition(field=state, source=3, target=4)
     def rotate(self):
         try:
             image = self.open_image()
@@ -106,23 +116,25 @@ class ImageTransformationFSM(models.Model):
             ).save()
 
             rotate_image = image.rotate(90)
-            rotate_image.save(f'./static/{self.job_id.id}/current{self.extension}')
+            rotate_image.save(self.image_path)
         except Exception as e:
             db_logger.exception(e)
             self.state = 0
             return None
 
-        db_logger.info(f'Image {self.job_id} is rotated 90 degrees')
+        db_logger.info(f'Image {self.job_id.id} is rotated 90 degrees')
         
         Steps(
             job_id=self.job_id,
             step="Rotar 90 grados",
             status="SUCCESS",
         ).save()
+        self.job_id.step = 4
+        self.job_id.save()
 
         return "rotated"
 
-    @transition(field=state, source='4', target='5')
+    @transition(field=state, source=4, target=5)
     def invert_vertically(self):
         try:
             image = self.open_image()
@@ -133,23 +145,25 @@ class ImageTransformationFSM(models.Model):
             ).save()
 
             invert_vertically_image = image.transpose(method=Image.FLIP_TOP_BOTTOM)
-            invert_vertically_image.save(f'./static/{self.job_id.id}/current{self.extension}')
+            invert_vertically_image.save(self.image_path)
         except Exception as e:
             db_logger.exception(e)
             self.state = 0
             return None
 
-        db_logger.info(f'Image {self.job_id} was inverted vertically')
+        db_logger.info(f'Image {self.job_id.id} was inverted vertically')
         
         Steps(
             job_id=self.job_id,
             step="Invertir Verticalmente",
             status="SUCCESS",
         ).save()
+        self.job_id.step = 5
+        self.job_id.save()
             
         return "INVERTED VERTICALLY"
 
-    @transition(field=state, source='5', target='0')
+    @transition(field=state, source=5, target=0)
     def save_final_image(self):
         try:
             image = self.open_image()
@@ -160,9 +174,10 @@ class ImageTransformationFSM(models.Model):
             return None
 
         self.job_id.status = "FINISHED"
+        self.job_id.step = 0
         self.job_id.save()
 
-        db_logger.info(f'job {self.job_id} is finished')
+        db_logger.info(f'job {self.job_id.id} is finished')
 
         return "SAVED"
 

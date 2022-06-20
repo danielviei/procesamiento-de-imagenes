@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
 
-from .apps.jobs.views import JobsListAPIView, job_start, JobsRetrieveAPIView
+from .apps.jobs.views import JobsListAPIView, job_start, JobsRetrieveUpdateAPIView
 from .apps.logs.views import LogsListAPIView, LogsRetrieveAPIView
 
 router = routers.DefaultRouter()
@@ -27,7 +27,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),
     path('job/', job_start, name='job'),
-    path('job/<int:id>', JobsRetrieveAPIView.as_view(), name='jobs'),
+    path('job/<int:id>', JobsRetrieveUpdateAPIView.as_view(), name='jobs'),
     path('jobs/', JobsListAPIView.as_view(), name='jobs'),
     path('logs/', LogsListAPIView.as_view(), name='logs'),
     path('logs/<int:id>/', LogsRetrieveAPIView.as_view(), name='log'),
